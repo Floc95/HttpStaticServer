@@ -6,7 +6,9 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.ArrayList;
 
+import org.esgi.http.interfaces.ICookie;
 import org.esgi.http.interfaces.IHttpHandler;
 import org.esgi.http.interfaces.IRequestHttpHandler;
 import org.esgi.http.interfaces.IResponseHttpHandler;
@@ -14,6 +16,9 @@ import org.esgi.http.interfaces.IResponseHttpHandler;
 
 public class MyHandlerTest implements IHttpHandler {
 
+	private SessionIdGenerator sessionIdGenerator = new SessionIdGenerator();
+	private ICookie sessionCookie = null;
+	
 	@Override
 	public void execute(IRequestHttpHandler request,
 			IResponseHttpHandler response) throws IOException {
@@ -25,6 +30,27 @@ public class MyHandlerTest implements IHttpHandler {
 		String url = request.getRemoteAddress();
 		String fullPath = request.getRealPath(url);
 		
+		// Session ID
+		ArrayList<ICookie> cookies = request.getCookies();
+		sessionCookie = null;
+		for (int i = 0; i < cookies.size(); i++) {
+			ICookie current = cookies.get(i);
+			if (current.getName().equals("SESSION_ID"))
+			{
+				sessionCookie = current;
+				break;
+			}
+		}
+		
+		if (sessionCookie == null)
+		{
+			sessionCookie = new Cookie("SESSION_ID", sessionIdGenerator.createId());
+			//response.addCookie(sessionCookie.getName(), sessionCookie.getValue(), 3600, "/");
+		}
+
+		System.out.println("ID de la session : " + sessionCookie.getValue());
+		
+		// Response
         if (fullPath != null)
         {
         	File f = new File(fullPath);
@@ -52,6 +78,7 @@ public class MyHandlerTest implements IHttpHandler {
 		response.setHttpCode("200 OK");
 		response.setContentType("application/download");
 		response.addHeader("Content-Disposition", "attachment;filename=\"" + f.getName() + "\"");
+		response.addCookie(sessionCookie.getName(), sessionCookie.getValue(), 3600, "/");
 		response.getWriter().write("\r\n");
 		response.getWriter().flush();
 		
@@ -85,6 +112,7 @@ public class MyHandlerTest implements IHttpHandler {
 	{
 		response.setHttpCode("200 OK");
 		response.setContentType("text/html; charset=utf-8");
+		response.addCookie(sessionCookie.getName(), sessionCookie.getValue(), 3600, "/");
 		response.getWriter().write("\r\n");
 		response.getWriter().flush();
 		

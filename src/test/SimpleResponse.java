@@ -67,7 +67,7 @@ public class SimpleResponse implements IResponseHttpHandler {
 	}
 
 	@Override
-	public void addCookie(String name, String value, int duration, int path) {
+	public void addCookie(String name, String value, int duration, String path) {
 		Date expdate = new Date();
 		expdate.setTime (expdate.getTime() + (duration * 1000));
 		DateFormat df = new SimpleDateFormat("dd MMM yyyy kk:mm:ss z", Locale.US);
