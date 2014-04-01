@@ -28,8 +28,6 @@ public class StaticHandler implements IHttpHandler {
 
 		String url = request.getUrl();
 		String fullPath = request.getRealPath(url);
-
-		response.getWriter().write("TEST");
 		
 		// Session ID
 		ICookie[] cookies = request.getCookies();
