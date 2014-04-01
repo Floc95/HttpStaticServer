@@ -5,7 +5,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.esgi.http.interfaces.ICookie;
@@ -20,13 +19,10 @@ public class StaticHandler implements IHttpHandler {
 
 	private SessionIdGenerator sessionIdGenerator = new SessionIdGenerator();
 	private ISession currentSession = null;
-	private HashMap<String, ISession> sessions;
 
 	@Override
 	public void execute(IRequestHttpHandler request,
 			IResponseHttpHandler response, HashMap<String, ISession> sessions) throws IOException {
-
-		this.sessions = sessions;
 		
 		System.out.println("Hostname : " + request.getHostname());
 
@@ -103,7 +99,7 @@ public class StaticHandler implements IHttpHandler {
 		from = new BufferedInputStream(new FileInputStream(f), bufferSize * 2);
 		byte[] bufferFile = new byte[bufferSize];
 
-		for (int i = 0;; i++) {
+		for (;;) {
 			int len = from.read(bufferFile);
 			if (len < 0) {
 				break;
