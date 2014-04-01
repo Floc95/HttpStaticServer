@@ -1,9 +1,10 @@
-package test;
+package org.esgi.http.request;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.net.Socket;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -13,15 +14,23 @@ import java.util.TimeZone;
 
 import org.esgi.http.interfaces.IResponseHttpHandler;
 
-public class SimpleResponse implements IResponseHttpHandler {
+public class Response implements IResponseHttpHandler {
+
 	Writer writer;
 	OutputStream out;
 	String contentType = "text/html; charset=utf-8";
 	HashMap<String, String> headers = new HashMap<>();	
-
-	public SimpleResponse(OutputStream out) {
-		this.out = out;
+	Request request;
+	
+	public Response(Socket client, Request request) {
+		try {
+			out = client.getOutputStream();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		writer = new OutputStreamWriter(out);
+		this.request = request;
 	}
 
 	@Override
@@ -65,7 +74,7 @@ public class SimpleResponse implements IResponseHttpHandler {
 			e.printStackTrace();
 		}
 	}
-
+	
 	@Override
 	public void addCookie(String name, String value, int duration, String path) {
 		Date expdate = new Date();
@@ -92,8 +101,8 @@ public class SimpleResponse implements IResponseHttpHandler {
 	}
 
 	@Override
-	public void setContentLength() {
-		// TODO Auto-generated method stub
-		
+	public void setContentLength(int length) {
+		// TODO
 	}
+
 }

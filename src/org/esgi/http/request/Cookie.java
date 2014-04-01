@@ -1,18 +1,18 @@
-package test;
+package org.esgi.http.request;
 
 import org.esgi.http.interfaces.ICookie;
 
-public class Cookie implements ICookie {
+public class Cookie implements ICookie{
 
-	private String name;
-	private String value;
+	String name;
+	String value;;
 	
-	public Cookie(String name, String value)
-	{
+	
+	public Cookie(String name, String value) {
 		this.name = name;
 		this.value = value;
 	}
-	
+
 	@Override
 	public String getName() {
 		return name;

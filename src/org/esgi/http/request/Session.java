@@ -1,4 +1,4 @@
-package test;
+package org.esgi.http.request;
 
 import java.util.Date;
 import java.util.HashMap;

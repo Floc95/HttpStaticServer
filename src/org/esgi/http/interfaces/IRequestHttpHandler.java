@@ -1,8 +1,7 @@
 package org.esgi.http.interfaces;
 
-import java.util.ArrayList;
-
 public interface IRequestHttpHandler {
+	
 	/*
 	 * Return HttpParametersName (GET or POST)
 	 */
@@ -13,11 +12,10 @@ public interface IRequestHttpHandler {
 	 */
 	String getParameter(String key);
 	
-	boolean isEmptyRequest();
 	
-	
-	ArrayList<ICookie> getCookies();
-	
+	ICookie[] getCookies();
+	int getPort();
+	String getUrl();
 	/* Return Http Method (GET POST)*/
 	String getMethod();
 	
@@ -27,9 +25,11 @@ public interface IRequestHttpHandler {
 	
 	String getHeader(String key);
 	
+	
 	String getRealPath(String path);
-
-    String getHostname();
-
-    String getRemoteAddress();
+	
+	String getHostname();
+	
+	String getRemoteAddress();
+	
 }

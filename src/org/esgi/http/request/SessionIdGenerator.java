@@ -1,4 +1,4 @@
-package test;
+package org.esgi.http.request;
 
 public class SessionIdGenerator {
 

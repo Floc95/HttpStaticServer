@@ -1,4 +1,5 @@
 package org.esgi.http.interfaces;
+
 import java.io.OutputStream;
 import java.io.Writer;
 
@@ -12,5 +13,5 @@ public interface IResponseHttpHandler {
 	void addCookie(String name, String value, int duration, String path);
 	void setHttpCode(String code);
 	void setErrorCode();
-	void setContentLength();
+	void setContentLength(int length);
 }
