@@ -7,17 +7,20 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import org.esgi.http.interfaces.ICookie;
 import org.esgi.http.interfaces.IHttpHandler;
 import org.esgi.http.interfaces.IRequestHttpHandler;
 import org.esgi.http.interfaces.IResponseHttpHandler;
+import org.esgi.http.interfaces.ISession;
 
 
 public class MyHandlerTest implements IHttpHandler {
 
 	private SessionIdGenerator sessionIdGenerator = new SessionIdGenerator();
-	private ICookie sessionCookie = null;
+	private ISession currentSession = null;
+	private HashMap<String, ISession> sessions = new HashMap<>();
 	
 	@Override
 	public void execute(IRequestHttpHandler request,
@@ -32,23 +35,36 @@ public class MyHandlerTest implements IHttpHandler {
 		
 		// Session ID
 		ArrayList<ICookie> cookies = request.getCookies();
-		sessionCookie = null;
+		currentSession = null;
 		for (int i = 0; i < cookies.size(); i++) {
 			ICookie current = cookies.get(i);
-			if (current.getName().equals("SESSION_ID"))
+			if (current.getName().equals("SESSION_ID") && sessions.containsKey(current.getValue()))
 			{
-				sessionCookie = current;
+				currentSession = sessions.get(current.getValue());
 				break;
 			}
 		}
 		
-		if (sessionCookie == null)
+		if (currentSession == null)
 		{
-			sessionCookie = new Cookie("SESSION_ID", sessionIdGenerator.createId());
+			String id = sessionIdGenerator.createId();
+			currentSession = new Session(id);
+			sessions.put(id, currentSession);
 			//response.addCookie(sessionCookie.getName(), sessionCookie.getValue(), 3600, "/");
 		}
+		
+		Object counter = currentSession.getAttribute("Counter");
+		if (counter == null)
+		{
+			currentSession.setAttribute("Counter", 1);
+		}
+		else
+		{
+			currentSession.setAttribute("Counter", (int)counter + 1);
+		}
 
-		System.out.println("ID de la session : " + sessionCookie.getValue());
+		System.out.println("ID de la session : " + currentSession.getSessionId());
+		System.out.println("Counter : " + currentSession.getAttribute("Counter"));
 		
 		// Response
         if (fullPath != null)
@@ -78,7 +94,7 @@ public class MyHandlerTest implements IHttpHandler {
 		response.setHttpCode("200 OK");
 		response.setContentType("application/download");
 		response.addHeader("Content-Disposition", "attachment;filename=\"" + f.getName() + "\"");
-		response.addCookie(sessionCookie.getName(), sessionCookie.getValue(), 3600, "/");
+		response.addCookie("SESSION_ID", currentSession.getSessionId(), 3600, "/");
 		response.getWriter().write("\r\n");
 		response.getWriter().flush();
 		
@@ -112,7 +128,7 @@ public class MyHandlerTest implements IHttpHandler {
 	{
 		response.setHttpCode("200 OK");
 		response.setContentType("text/html; charset=utf-8");
-		response.addCookie(sessionCookie.getName(), sessionCookie.getValue(), 3600, "/");
+		response.addCookie("SESSION_ID", currentSession.getSessionId(), 3600, "/");
 		response.getWriter().write("\r\n");
 		response.getWriter().flush();
 		
