@@ -41,7 +41,7 @@ public class RequestBuilder {
 	}
 	private void buildMethodAndGetParameters(Request request, BufferedReader reader) throws Exception {
 		String line = reader.readLine();
-		
+		//System.err.println(line);
 		if (line == null)
 		{
 			throw new Exception("Empty Request");
@@ -67,6 +67,7 @@ public class RequestBuilder {
 	private void buildHeaders(Request request, BufferedReader reader) throws IOException {
 		String line;
 		while ( null != (line =reader.readLine() ) && ! line.isEmpty() ){
+			//System.err.println(line);
 			int splitIndex = line.indexOf(':');
 			if (-1 != splitIndex) {
 				request.headers.put(line.substring(0, splitIndex).trim().toLowerCase(), java.net.URLDecoder.decode(line.substring(splitIndex+1).trim(), "UTF-8"));
@@ -80,7 +81,10 @@ public class RequestBuilder {
 			String[] cookiePairParts = cookieString.split(";");
 			for (String cookiePair : cookiePairParts){
 				String[] keyValue = cookiePair.split("=");
-				request.cookies.put(keyValue[0].trim(), keyValue[1].trim());
+				if (keyValue.length == 1)
+					request.cookies.put(keyValue[0].trim(), "");
+				else
+					request.cookies.put(keyValue[0].trim(), keyValue[1].trim());
 			}
 		}
 	}

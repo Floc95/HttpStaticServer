@@ -40,16 +40,16 @@ public class HttpServer {
 	}
 	Map<String, IHttpHandler> handlersPool = new HashMap<>();
 	
-	public void run() throws Exception {
+	public void run(boolean buildResponse) throws Exception {
 		if (null != socket){
-			System.out.println("Serveur lancé.");
+			System.out.println("Serveur lancé : localhost:" + config.port);
 			while (true) {
 				Socket client = socket.accept();
 				Request request = requestBuilder.build(client);
 				
 				if (request == null) continue;
 				
-				Response response = new Response(client, request);
+				Response response = buildResponse ? new Response(client, request) : new Response();
 				for (Handler handlerConfig : request.host.handlers){
 					Pattern p = Pattern.compile(handlerConfig.pattern);
 					if (p.matcher(request.getUrl()).find()){
@@ -58,7 +58,7 @@ public class HttpServer {
 							handler = (IHttpHandler) Class.forName(handlerConfig.clazz).newInstance();
 							handlersPool.put(handlerConfig.clazz, handler);
 						}
-						handler.execute(request, response, sessions);
+						handler.execute(request, response, sessions, client);
 						break;
 					}
 				}

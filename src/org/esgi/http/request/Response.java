@@ -1,6 +1,7 @@
 package org.esgi.http.request;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
@@ -10,6 +11,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.TimeZone;
 
 import org.esgi.http.interfaces.IResponseHttpHandler;
@@ -19,8 +22,11 @@ public class Response implements IResponseHttpHandler {
 	Writer writer;
 	OutputStream out;
 	String contentType = "text/html; charset=utf-8";
+	String httpCode = "200 OK";
 	HashMap<String, String> headers = new HashMap<>();	
 	Request request;
+	
+	public boolean dontWrite = false;
 	
 	public Response(Socket client, Request request) {
 		try {
@@ -31,6 +37,10 @@ public class Response implements IResponseHttpHandler {
 		}
 		writer = new OutputStreamWriter(out);
 		this.request = request;
+	}
+
+	public Response() {
+		// TODO Auto-generated constructor stub
 	}
 
 	@Override
@@ -56,22 +66,40 @@ public class Response implements IResponseHttpHandler {
 	@Override
 	public void addHeader(String key, String value) {
 		headers.put(key, value);
-		try {
-			writer.write(key + ": " + value + "\n");
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		if (!dontWrite)
+		{
+			try {
+				writer.write(key + ": " + value + "\n");
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
+	}
+	
+	@Override
+	public boolean getDontWrite()
+	{
+		return dontWrite;
+	}
+	
+	@Override
+	public void setDontWrite(boolean value)
+	{
+		dontWrite = value;
 	}
 
 	@Override
 	public void setContentType(String contentType) {
 		this.contentType = contentType;
-		try {
-			writer.write("Content-Type: " + contentType + "\n");
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		if (!dontWrite)
+		{
+			try {
+				writer.write("Content-Type: " + contentType + "\n");
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 	}
 	
@@ -87,11 +115,15 @@ public class Response implements IResponseHttpHandler {
 
 	@Override
 	public void setHttpCode(String code) {
-		try {
-			writer.write("HTTP/1.1 " + code + "\n");
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		this.httpCode = code;
+		if (!dontWrite)
+		{
+			try {
+				writer.write("HTTP/1.1 " + code + "\n");
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 	}
 
@@ -103,6 +135,28 @@ public class Response implements IResponseHttpHandler {
 	@Override
 	public void setContentLength(int length) {
 		// TODO
+	}
+
+	@Override
+	public void writeHeaders(OutputStream output) throws IOException {
+		new OutputStreamWriter(output).write("HTTP/1.1 200 OK");
+		writeCustomHeaders(output, headers);
+	}
+
+	@Override
+	public void writeCustomHeaders(OutputStream output, Map<String, String> headers) throws IOException {
+		Writer writer = new OutputStreamWriter(output);
+		for (Entry<String, String> entry : headers.entrySet())
+			writer.write(entry.getKey() + ": " + entry.getValue() + "\n");
+	}
+
+	@Override
+	public void writeContent(OutputStream output, InputStream input) throws IOException {
+		Writer writer = new OutputStreamWriter(output);
+		writer.write("\r\n");
+		/*int i =-1;
+        while (-1 !=  (i = input.read()))
+            output.write(i);*/
 	}
 
 }

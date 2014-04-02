@@ -1,7 +1,11 @@
 package org.esgi.http.interfaces;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Writer;
+import java.net.Socket;
+import java.util.Map;
 
 public interface IResponseHttpHandler {
 	
@@ -14,4 +18,10 @@ public interface IResponseHttpHandler {
 	void setHttpCode(String code);
 	void setErrorCode();
 	void setContentLength(int length);
+	void writeHeaders(OutputStream output) throws IOException;
+    void writeCustomHeaders(OutputStream output, Map<String, String> headers) throws IOException;
+    void writeContent(OutputStream output, InputStream input) throws IOException;
+	
+	boolean getDontWrite();
+	void setDontWrite(boolean value);
 }

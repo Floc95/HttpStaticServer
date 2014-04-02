@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.net.Socket;
 import java.util.HashMap;
 
 import org.esgi.http.interfaces.ICookie;
@@ -22,7 +23,7 @@ public class StaticHandler implements IHttpHandler {
 
 	@Override
 	public void execute(IRequestHttpHandler request,
-			IResponseHttpHandler response, HashMap<String, ISession> sessions) throws IOException {
+			IResponseHttpHandler response, HashMap<String, ISession> sessions, Socket socket) throws IOException {
 		
 		System.out.println("Hostname : " + request.getHostname());
 
