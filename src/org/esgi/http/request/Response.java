@@ -139,24 +139,25 @@ public class Response implements IResponseHttpHandler {
 
 	@Override
 	public void writeHeaders(OutputStream output) throws IOException {
-		new OutputStreamWriter(output).write("HTTP/1.1 200 OK");
+		output.write("HTTP/1.1 200 OK\r\n".getBytes());
+//		System.out.println("HTTP/1.1 200 OK");
 		writeCustomHeaders(output, headers);
 	}
 
 	@Override
 	public void writeCustomHeaders(OutputStream output, Map<String, String> headers) throws IOException {
-		Writer writer = new OutputStreamWriter(output);
-		for (Entry<String, String> entry : headers.entrySet())
-			writer.write(entry.getKey() + ": " + entry.getValue() + "\n");
+		for (Entry<String, String> entry : headers.entrySet()){
+			System.out.println(entry.getKey() + ": " + entry.getValue());
+			output.write((entry.getKey() + ": " + entry.getValue().replace("\"", "") + "\r\n").getBytes());
+		}
 	}
 
 	@Override
 	public void writeContent(OutputStream output, InputStream input) throws IOException {
-		Writer writer = new OutputStreamWriter(output);
-		writer.write("\r\n");
-		/*int i =-1;
+		output.write("\r\n\r\n".getBytes());
+		int i =-1;
         while (-1 !=  (i = input.read()))
-            output.write(i);*/
+            output.write(i);
 	}
 
 }
