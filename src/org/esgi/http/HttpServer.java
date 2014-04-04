@@ -18,8 +18,11 @@ import org.esgi.http.request.Response;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import esgi.threadpool.FixedThreadPool;
+
 public class HttpServer {
 
+	FixedThreadPool pool = new FixedThreadPool(5);
 	Config config;
 	public Map<String, Host> hosts = new HashMap<>();
 	ServerSocket socket;
@@ -40,29 +43,40 @@ public class HttpServer {
 	}
 	Map<String, IHttpHandler> handlersPool = new HashMap<>();
 	
-	public void run(boolean buildResponse) throws Exception {
+	public void run(final boolean buildResponse) throws Exception {
 		if (null != socket){
 			System.out.println("Serveur lancé : localhost:" + config.port);
 			while (true) {
-				Socket client = socket.accept();
-				Request request = requestBuilder.build(client);
-				
-				if (request == null) continue;
-				
-				Response response = buildResponse ? new Response(client, request) : new Response();
-				for (Handler handlerConfig : request.host.handlers){
-					Pattern p = Pattern.compile(handlerConfig.pattern);
-					if (p.matcher(request.getUrl()).find()){
-						IHttpHandler handler = handlersPool.get(handlerConfig.clazz);
-						if (null == handler){
-							handler = (IHttpHandler) Class.forName(handlerConfig.clazz).newInstance();
-							handlersPool.put(handlerConfig.clazz, handler);
+				final Socket client = socket.accept();
+				pool.addJob(new Runnable() {
+					@Override
+					public void run() {
+						Request request;
+						try {
+							request = requestBuilder.build(client);
+						
+							if (request == null) return;
+							
+							Response response = buildResponse ? new Response(client, request) : new Response();
+							for (Handler handlerConfig : request.host.handlers){
+								Pattern p = Pattern.compile(handlerConfig.pattern);
+								if (p.matcher(request.getUrl()).find()){
+									IHttpHandler handler = handlersPool.get(handlerConfig.clazz);
+									if (null == handler){
+										handler = (IHttpHandler) Class.forName(handlerConfig.clazz).newInstance();
+										handlersPool.put(handlerConfig.clazz, handler);
+									}
+									handler.execute(request, response, sessions, client);
+									break;
+								}
+							}
+							client.close();
+						} catch (Exception e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
 						}
-						handler.execute(request, response, sessions, client);
-						break;
 					}
-				}
-				client.close();
+				});
 			}
 		}
 	}
